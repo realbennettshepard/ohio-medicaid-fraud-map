@@ -130,6 +130,8 @@
   .set-Hospital.set-inpatient,.setpill.hosp{background:rgba(217,154,43,.16);color:#e8b860;}
   .set-out{background:rgba(91,143,176,.12);color:#8fb4cc;}
   .rkval{font-weight:600;}
+  circle.sdot{cursor:pointer;transition:stroke .1s;}
+  circle.sdot:hover{stroke:#fff;stroke-width:2;}
   .orgsub{color:var(--mut);font-size:10.5px;font-family:var(--mono);display:block;margin-top:2px;}
 </style>
 
@@ -368,7 +370,7 @@ draw();
   const label=new Set(['Scioto','Vinton','Meigs','Lawrence','Pike','Franklin','Hamilton','Cuyahoga']);
   pts.forEach(p=>{
     const t=(p.mean_risk-ymin)/(ymax-ymin);
-    g+=`<circle cx="${px(p.od_rate)}" cy="${py(p.mean_risk)}" r="5" fill="${cramp(t)}" stroke="#0d1014" stroke-width=".8" opacity=".92"><title>${p.county}: OD ${p.od_rate}/100k, risk ${p.mean_risk}</title></circle>`;
+    g+=`<circle class="sdot" data-county="${p.county}" data-od="${p.od_rate}" data-risk="${p.mean_risk}" data-deaths="${p.od_deaths??''}" cx="${px(p.od_rate)}" cy="${py(p.mean_risk)}" r="5" fill="${cramp(t)}" stroke="#0d1014" stroke-width=".8" opacity=".92"></circle>`;
     if(label.has(p.county))g+=`<text x="${px(p.od_rate)+8}" y="${py(p.mean_risk)+3}" fill="#c9d2dc" font-size="10.5" font-family="ui-monospace,monospace">${p.county}</text>`;
   });
   // axis titles
@@ -376,6 +378,19 @@ draw();
   g+=`<text transform="translate(15,${mT+(H-mT-mB)/2}) rotate(-90)" fill="#a7b2c0" font-size="12" text-anchor="middle">Mean Medicaid fraud risk</text>`;
   document.getElementById('scatter').innerHTML=g;
   document.getElementById('scnote').innerHTML=`Each dot is one Ohio county (n=${n}); color = fraud risk. The dashed line is the least-squares fit &mdash; <b style="color:var(--txt)">Pearson r = ${META.od_fraud_r}</b>, a moderate positive association: the southern-Ohio overdose corridor (Scioto, Vinton, Meigs, Lawrence, Pike) is also where modeled Medicaid fraud risk runs highest. Correlation is not causation &mdash; high-burden counties draw both genuine treatment demand and opportunistic billing.`;
+  const sc=document.getElementById('scatter');
+  sc.addEventListener('mousemove',e=>{
+    const c=e.target.closest('circle.sdot'); if(!c){tip.style.opacity=0;return;}
+    tip.innerHTML=`<div class="tc">${c.dataset.county} County</div>`+
+      `<div class="tr"><span>Overdose deaths/100k</span><b>${c.dataset.od}</b></div>`+
+      `<div class="tr"><span>Mean fraud risk</span><b>${c.dataset.risk}</b></div>`+
+      (c.dataset.deaths?`<div class="tr"><span>OD deaths (3-yr)</span><b>${c.dataset.deaths}</b></div>`:'');
+    tip.style.opacity=1;
+    let x=e.clientX+14,y=e.clientY+14;
+    if(x+250>innerWidth)x=e.clientX-250; if(y+150>innerHeight)y=e.clientY-150;
+    tip.style.left=x+'px';tip.style.top=y+'px';
+  });
+  sc.addEventListener('mouseleave',()=>tip.style.opacity=0);
 })();
 
 </script>
