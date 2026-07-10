@@ -4,13 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ohio Medicaid Fraud Risk &times; Drug-Overdose Burden</title>
-<meta name="description" content="County heat map of modeled Medicaid fraud risk across Ohio providers, set against drug-overdose mortality and substance-use treatment supply.">
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{background:#12151a;min-height:100%;}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;}
-  img{max-width:100%;}
-</style>
+<style>*{margin:0;padding:0;box-sizing:border-box;}html,body{background:#12151a;min-height:100%;}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;}img{max-width:100%;}</style>
 </head>
 <body>
 <div id="app">
@@ -370,7 +364,7 @@ draw();
   const label=new Set(['Scioto','Vinton','Meigs','Lawrence','Pike','Franklin','Hamilton','Cuyahoga']);
   pts.forEach(p=>{
     const t=(p.mean_risk-ymin)/(ymax-ymin);
-    g+=`<circle class="sdot" data-county="${p.county}" data-od="${p.od_rate}" data-risk="${p.mean_risk}" data-deaths="${p.od_deaths??''}" cx="${px(p.od_rate)}" cy="${py(p.mean_risk)}" r="5" fill="${cramp(t)}" stroke="#0d1014" stroke-width=".8" opacity=".92"></circle>`;
+    g+=`<circle class="sdot" data-county="${p.county}" data-od="${p.od_rate}" data-risk="${p.mean_risk}" data-deaths="${p.od_deaths??''}" cx="${px(p.od_rate)}" cy="${py(p.mean_risk)}" r="6" fill="${cramp(t)}" stroke="#0d1014" stroke-width=".8" opacity=".92"><title>${p.county} County \u2014 ${p.od_rate} overdoses/100k \u00b7 fraud risk ${p.mean_risk}</title></circle>`;
     if(label.has(p.county))g+=`<text x="${px(p.od_rate)+8}" y="${py(p.mean_risk)+3}" fill="#c9d2dc" font-size="10.5" font-family="ui-monospace,monospace">${p.county}</text>`;
   });
   // axis titles
@@ -380,7 +374,7 @@ draw();
   document.getElementById('scnote').innerHTML=`Each dot is one Ohio county (n=${n}); color = fraud risk. The dashed line is the least-squares fit &mdash; <b style="color:var(--txt)">Pearson r = ${META.od_fraud_r}</b>, a moderate positive association: the southern-Ohio overdose corridor (Scioto, Vinton, Meigs, Lawrence, Pike) is also where modeled Medicaid fraud risk runs highest. Correlation is not causation &mdash; high-burden counties draw both genuine treatment demand and opportunistic billing.`;
   const sc=document.getElementById('scatter');
   sc.addEventListener('mousemove',e=>{
-    const c=e.target.closest('circle.sdot'); if(!c){tip.style.opacity=0;return;}
+    const c=e.target.closest('circle.sdot'); if(!c) return;
     tip.innerHTML=`<div class="tc">${c.dataset.county} County</div>`+
       `<div class="tr"><span>Overdose deaths/100k</span><b>${c.dataset.od}</b></div>`+
       `<div class="tr"><span>Mean fraud risk</span><b>${c.dataset.risk}</b></div>`+
